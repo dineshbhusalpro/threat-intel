@@ -1,30 +1,3 @@
-bash```
-# 1. Create the .env file
-cp .env.template .env
-
-# 2. Create necessary directories
-mkdir -p data/pdfs logs temp frontend
-
-# 3. Build and start all services
-docker-compose build --no-cache
-docker-compose up -d
-
-
-# 4. Wait for services to initialize (about 30 seconds)
-sleep 30
-
-# 5. Check health status
-curl http://localhost:8000/health
-
-# 6. Access the dashboard
-open http://localhost:3000
-
-# 7. Run tests
-python tests/test_pipeline.py
-python tests/test_queries.py
-```
-
-
 # Threat Net
 A Document Intelligence Pipeline that processes threat intelligence reports to extract
 and retrieve both structured indicators and unstructured content.
@@ -48,6 +21,7 @@ EOL
 ### 3. Start Services
 ```bash
 # Start all services
+docker-compose build --no-cache
 docker-compose up -d
 
 # Verify services are running
@@ -447,10 +421,6 @@ RETURN path
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
 ## 👥 Team
 
 - **Your Name** - Senior Big Data Engineer
@@ -463,12 +433,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Neo4j for graph database
 - PostgreSQL for robust data storage
 - The open-source community
-
-## 📞 Support
-
-For issues, questions, or suggestions:
-- Open an issue on GitHub
-- Contact: ilank@activefence.com
 
 ---
 
@@ -488,7 +452,3 @@ For issues, questions, or suggestions:
 ✅ Graph queries under 2 seconds  
 
 **Status: READY FOR SUBMISSION** 🚀
-
----
-
-*Built with precision for ActiveFence by a Senior Big Data Engineer focused on AI-driven threat intelligence infrastructure.*

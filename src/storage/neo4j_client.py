@@ -346,6 +346,12 @@ class Neo4jClient:
             indicators = []
             for record in result:
                 indicator = dict(record)
+                # Convert Neo4j DateTime objects to Python datetime objects
+                if 'first_seen' in indicator and indicator['first_seen'] is not None:
+                    indicator['first_seen'] = indicator['first_seen'].to_native()
+                if 'last_seen' in indicator and indicator['last_seen'] is not None:
+                    indicator['last_seen'] = indicator['last_seen'].to_native()
+                    
                 if indicator['metadata']:
                     indicator['metadata'] = json.loads(indicator['metadata'])
                 indicators.append(indicator)
@@ -361,17 +367,18 @@ class Neo4jClient:
         query = f"""
         MATCH path = (start:Indicator {{indicator_id: $indicator_id}})-[*1..{max_hops}]-(related:Indicator)
         WHERE start <> related
-        WITH related, min(length(path)) as distance
+        // Add related.occurrence_count to the WITH clause so it's available for ORDER BY
+        WITH related, min(length(path)) as distance, related.occurrence_count as occurrence_count
+        ORDER BY distance, occurrence_count DESC
         RETURN DISTINCT
             related.indicator_id as id,
             related.type as type,
             related.value as value,
             related.normalized_value as normalized_value,
             distance
-        ORDER BY distance, related.occurrence_count DESC
         LIMIT $limit
         """
-        
+
         with self.driver.session(database=self.database) as session:
             result = session.run(query,
                                indicator_id=indicator_id,
@@ -471,37 +478,48 @@ class Neo4jClient:
         
         query = f"""
         MATCH path = (center)-[*0..{max_hops}]-(connected)
-        WHERE (center:Indicator {{indicator_id: $node_id}}) OR 
-              (center:Campaign {{name: $node_id}}) OR
-              (center:ThreatActor {{name: $node_id}})
+        WHERE 
+            (
+                (center:Indicator AND center.indicator_id = $node_id) OR
+                (center:Campaign AND center.name = $node_id) OR
+                (center:ThreatActor AND center.name = $node_id)
+            )
         WITH center, connected, path
         LIMIT $limit
+        
+        // Collect and flatten nodes and relationships
         WITH collect(DISTINCT center) + collect(DISTINCT connected) as nodes,
-             [r in collect(DISTINCT relationships(path)) | r] as rels
+            [rel IN relationships(path) | rel] as all_rels
+        
+        UNWIND all_rels as rel_to_unwind
+        
+        WITH nodes, collect(DISTINCT rel_to_unwind) as relationships
+        
         UNWIND nodes as node
         WITH collect(DISTINCT {{
             id: CASE 
                 WHEN node:Indicator THEN node.indicator_id
                 WHEN node:Campaign THEN node.name
                 WHEN node:ThreatActor THEN node.name
-                ELSE id(node)
+                ELSE toString(id(node))
             END,
             label: labels(node)[0],
             properties: properties(node)
-        }}) as nodes, rels
-        UNWIND rels as rel
+        }}) as nodes, relationships
+        
+        UNWIND relationships as rel
         WITH nodes, collect(DISTINCT {{
             source: CASE
                 WHEN startNode(rel):Indicator THEN startNode(rel).indicator_id
                 WHEN startNode(rel):Campaign THEN startNode(rel).name
                 WHEN startNode(rel):ThreatActor THEN startNode(rel).name
-                ELSE id(startNode(rel))
+                ELSE toString(id(startNode(rel)))
             END,
             target: CASE
                 WHEN endNode(rel):Indicator THEN endNode(rel).indicator_id
                 WHEN endNode(rel):Campaign THEN endNode(rel).name
                 WHEN endNode(rel):ThreatActor THEN endNode(rel).name
-                ELSE id(endNode(rel))
+                ELSE toString(id(endNode(rel)))
             END,
             type: type(rel),
             properties: properties(rel)
@@ -642,12 +660,11 @@ class Neo4jClient:
         """Get database statistics"""
         
         query = """
-        MATCH (d:Document) WITH count(d) as doc_count
-        MATCH (i:Indicator) WITH doc_count, count(i) as indicator_count, i
-        WITH doc_count, indicator_count, collect(DISTINCT i.type) as types
-        MATCH ()-[r:MENTIONED_IN]->() WITH doc_count, indicator_count, types, count(r) as mention_count
-        MATCH (c:Campaign) WITH doc_count, indicator_count, types, mention_count, count(c) as campaign_count
-        MATCH (t:ThreatActor) WITH doc_count, indicator_count, types, mention_count, campaign_count, count(t) as actor_count
+        CALL { MATCH (d:Document) RETURN count(d) as doc_count }
+        CALL { MATCH (i:Indicator) RETURN count(i) as indicator_count, collect(DISTINCT i.type) as types }
+        CALL { MATCH ()-[r:MENTIONED_IN]->() RETURN count(r) as mention_count }
+        CALL { MATCH (c:Campaign) RETURN count(c) as campaign_count }
+        CALL { MATCH (t:ThreatActor) RETURN count(t) as actor_count }
         
         RETURN {
             documents: doc_count,

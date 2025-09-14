@@ -312,8 +312,7 @@ class InputValidator:
     def _validate_bitcoin(address: str) -> tuple[bool, str]:
         """Validate Bitcoin address"""
         # Basic Bitcoin address validation (P2PKH and P2SH)
-        pattern = re.compile(r'^[13][a-km-zA-HJ-NP-Z1-9]{25,34}
-            )
+        pattern = re.compile(r'^[13][a-km-zA-HJ-NP-Z1-9]{25,34}')
         
         if pattern.match(address):
             # Could add checksum validation here
@@ -329,8 +328,7 @@ class InputValidator:
     def _validate_ethereum(address: str) -> tuple[bool, str]:
         """Validate Ethereum address"""
         # Ethereum address validation
-        pattern = re.compile(r'^0x[a-fA-F0-9]{40}
-            )
+        pattern = re.compile(r'^0x[a-fA-F0-9]{40}')
         
         if pattern.match(address):
             # Normalize to lowercase
@@ -384,14 +382,13 @@ class InputValidator:
     def _contains_sql_injection(text: str) -> bool:
         """Check for potential SQL injection patterns"""
         sql_patterns = [
-            r';\s*(DROP|DELETE|INSERT|UPDATE|ALTER|CREATE)\s+',
-            r'--\s*
-            ,
-            r'\/\*.*\*\/',
-            r'(UNION|SELECT).*(FROM|WHERE)',
-            r'OR\s+\d+=\d+',
-            r'OR\s+\'[^\']*\'\s*=\s*\'[^\']*\'',
-        ]
+                r';\s*(DROP|DELETE|INSERT|UPDATE|ALTER|CREATE)\s+',
+                r'--\s*',
+                r'\/\*.*\*\/',
+                r'(UNION|SELECT).*(FROM|WHERE)',
+                r'OR\s+\d+=\d+',
+                r'OR\s+\'[^\']*\'\s*=\s*\'[^\']*\'',
+            ]
         
         text_upper = text.upper()
         for pattern in sql_patterns:

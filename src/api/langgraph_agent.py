@@ -395,45 +395,56 @@ class ThreatIntelligenceAgent:
     async def detect_patterns(self) -> List[Dict]:
         """Detect patterns across the threat intelligence data"""
         patterns = []
+
+        # Use the current event loop for async operations
+        loop = asyncio.get_event_loop()
         
         try:
             # Pattern 1: Common indicators across campaigns
             campaign_query = """
             MATCH (i:Indicator)-[:PART_OF_CAMPAIGN]->(c:Campaign)
-            WITH i, COUNT(DISTINCT c) as campaign_count
-            WHERE campaign_count > 1
+            WITH i, COLLECT(c.name) as campaign_names
+            WHERE size(campaign_names) > 1
             RETURN i.type as indicator_type,
-                   i.value as indicator_value,
-                   campaign_count,
-                   COLLECT(c.name) as campaigns
+                i.value as indicator_value,
+                size(campaign_names) as campaign_count,
+                campaign_names as campaigns
             ORDER BY campaign_count DESC
             LIMIT 10
             """
             
-            with self.neo4j.driver.session() as session:
-                result = session.run(campaign_query)
-                for record in result:
-                    patterns.append({
-                        "pattern_type": "cross_campaign_indicator",
-                        "description": f"Indicator {record['indicator_value']} appears in {record['campaign_count']} campaigns",
-                        "confidence": min(record['campaign_count'] / 10.0, 1.0),
-                        "indicators_involved": [record['indicator_value']],
-                        "campaigns_involved": record['campaigns']
-                    })
+            # Run the synchronous database query in a separate thread
+            def run_campaign_query():
+                with self.neo4j.driver.session() as session:
+                    return [dict(record) for record in session.run(campaign_query)]
             
-            # Pattern 2: Indicator type distribution
+            campaign_results = await loop.run_in_executor(None, run_campaign_query)
+            
+            for record in campaign_results:
+                patterns.append({
+                    "pattern_type": "cross_campaign_indicator",
+                    "description": f"Indicator {record['indicator_value']} appears in {record['campaign_count']} campaigns",
+                    "confidence": min(record['campaign_count'] / 10.0, 1.0),
+                    "indicators_involved": [record['indicator_value']],
+                    "campaigns_involved": record['campaigns']
+                })
+            
+            # Pattern 2: Indicator type distribution (already fixed in previous response)
             type_query = """
             MATCH (i:Indicator)
             RETURN i.type as type, COUNT(*) as count
             ORDER BY count DESC
             """
             
-            with self.neo4j.driver.session() as session:
-                result = session.run(type_query)
-                type_distribution = {record['type']: record['count'] for record in result}
-                
-                # Find anomalies in distribution
-                total = sum(type_distribution.values())
+            def run_type_query():
+                with self.neo4j.driver.session() as session:
+                    return {record['type']: record['count'] for record in session.run(type_query)}
+
+            type_distribution = await loop.run_in_executor(None, run_type_query)
+            
+            # Find anomalies in distribution
+            total = sum(type_distribution.values())
+            if total > 0:
                 for ind_type, count in type_distribution.items():
                     ratio = count / total
                     if ratio > 0.3:  # If one type dominates
@@ -444,9 +455,11 @@ class ThreatIntelligenceAgent:
                             "indicators_involved": [],
                             "metadata": {"type": ind_type, "count": count}
                         })
-            
+        
         except Exception as e:
             logger.error(f"Pattern detection error: {e}")
+            # The API endpoint's try-except block will handle raising HTTPException
+            raise
         
         return patterns
     

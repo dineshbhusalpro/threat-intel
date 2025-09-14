@@ -539,7 +539,7 @@ async def run_test_queries():
         test_results.append({
             "query": "Find clusters of related social media accounts",
             "type": "pattern_detection",
-            "clusters_found": len(clusters)
+            "results_found": len(clusters)
         })
         
         return {

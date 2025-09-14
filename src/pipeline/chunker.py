@@ -117,6 +117,9 @@ class SemanticChunker:
         """
         if not text:
             return []
+
+        # Clean text - remove NULL bytes
+        text = text.replace('\x00', '')
         
         # Detect language
         language = self._detect_language(text)
