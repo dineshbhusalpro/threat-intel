@@ -1,0 +1,81 @@
+# Core dependencies
+python-dotenv==1.0.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# API Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# Document Processing
+PyPDF2==3.0.1
+pdfplumber==0.10.3
+pypdf==3.17.4
+unstructured[pdf]==0.11.8
+python-magic==0.4.27
+Pillow==10.2.0
+opencv-python-headless==4.9.0.80
+
+# Text Processing & NLP
+spacy==3.7.2
+langdetect==1.0.9
+nltk==3.8.1
+regex==2023.12.25
+beautifulsoup4==4.12.3
+chardet==5.2.0
+
+# Embeddings & ML
+sentence-transformers==2.3.1
+torch==2.1.2
+transformers==4.36.2
+numpy==1.26.3
+scikit-learn==1.4.0
+
+# Database Connections
+neo4j==5.16.0
+py2neo==2021.2.4
+psycopg2-binary==2.9.9
+pgvector==0.2.4
+sqlalchemy==2.0.25
+alembic==1.13.1
+
+# Vector Store
+chromadb==0.4.22
+qdrant-client==1.7.0
+
+# Caching & Queue
+redis==5.0.1
+celery==5.3.4
+
+# LangChain & LangGraph
+langchain>=0.1.0
+langchain-community>=0.0.10
+langgraph==0.0.26
+langchain-openai==0.0.5
+
+# Data Processing
+pandas==2.1.4
+pyarrow==14.0.2
+orjson==3.9.10
+
+# Utilities
+tqdm==4.66.1
+python-dateutil==2.8.2
+pytz==2023.3
+phonenumbers==8.13.27
+validators==0.22.0
+tldextract==5.1.1
+
+# Testing
+pytest==7.4.4
+pytest-asyncio==0.23.3
+pytest-cov==4.1.0
+
+# Monitoring
+prometheus-client==0.19.0
+structlog==24.1.0
+
+# Visualization
+networkx==3.2.1
+pyvis==0.3.2
