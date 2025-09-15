@@ -94,6 +94,20 @@ services:
     command: sh -c "sleep 30 && uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload"
     restart: unless-stopped
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: threat_intel_frontend
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+    environment:
+      - API_URL=http://api:8000
+    volumes:
+      - ./frontend:/app
+
 volumes:
   neo4j_data:
   neo4j_logs:

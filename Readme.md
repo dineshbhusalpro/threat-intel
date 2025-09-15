@@ -2,8 +2,18 @@
 A Document Intelligence Pipeline that processes threat intelligence reports to extract
 and retrieve both structured indicators and unstructured content.
 
+## System Design
+### 1. System Architecture
+![Project Screenshot](images/system_architecture.png)
 
-# Create .env file
+### 2. Database Architecture
+![Project Screenshot](images/database_architecture.png)
+
+### 3. Data Flow Diagram
+![Project Screenshot](images/data_flow_diagram.png)
+
+
+## Create .env file
 cat > .env << EOL
 NEO4J_URI=bolt://neo4j:7687
 NEO4J_USER=neo4j
@@ -21,7 +31,6 @@ EOL
 ### 3. Start Services
 ```bash
 # Start all services
-docker-compose build --no-cache
 docker-compose up -d
 
 # Verify services are running
@@ -421,13 +430,8 @@ RETURN path
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 👥 Team
-
-- **Your Name** - Senior Big Data Engineer
-- **ActiveFence** - Threat Intelligence Platform
-
 ## 🙏 Acknowledgments
-
+- Activefence for the task
 - OpenAI for GPT models
 - Anthropic for Claude assistance
 - Neo4j for graph database
@@ -447,8 +451,5 @@ RETURN path
 ✅ Indicator statistics implementation  
 ✅ Test suite with all required queries  
 ✅ Multilingual content handling  
-✅ 85%+ extraction accuracy achieved  
 ✅ Sub-second structured query performance  
 ✅ Graph queries under 2 seconds  
-
-**Status: READY FOR SUBMISSION** 🚀
