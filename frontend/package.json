@@ -1,0 +1,20 @@
+{
+  "name": "threat-intelligence-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Threat Intelligence Pipeline",
+  "main": "index.html",
+  "scripts": {
+    "start": "nginx -g 'daemon off;'",
+    "test": "echo \"No tests specified\""
+  },
+  "keywords": [
+    "threat-intelligence",
+    "visualization",
+    "d3js",
+    "dashboard"
+  ],
+  "author": "ActiveFence",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
