@@ -2,6 +2,9 @@
 A Document Intelligence Pipeline that processes threat intelligence reports to extract
 and retrieve both structured indicators and unstructured content.
 
+## Demo Video
+[demo-link](https://drive.google.com/file/d/18wXFdyKkjonTA4-Fo8_tcvuU8pYiIhts/view?usp=sharing)
+
 ## System Design
 ### 1. System Architecture
 ![Project Screenshot](images/system_architecture.png)
@@ -14,6 +17,7 @@ and retrieve both structured indicators and unstructured content.
 
 
 ## Create .env file
+```.env
 cat > .env << EOL
 NEO4J_URI=bolt://neo4j:7687
 NEO4J_USER=neo4j
@@ -28,7 +32,7 @@ REDIS_PORT=6379
 EOL
 ```
 
-### 3. Start Services
+## Start Services
 ```bash
 # Start all services
 docker-compose up -d
@@ -40,7 +44,7 @@ docker-compose ps
 docker-compose logs -f api
 ```
 
-### 4. Install Python Dependencies (for local development)
+### Install Python Dependencies (for local development)
 ```bash
 pip install -r requirements.txt
 

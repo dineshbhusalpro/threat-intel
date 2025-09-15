@@ -418,7 +418,7 @@ class Neo4jClient:
         campaigns_query = """
         MATCH (i:Indicator {indicator_id: $indicator_id})-[:PART_OF_CAMPAIGN]->(c:Campaign)
         OPTIONAL MATCH (c)-[:ATTRIBUTED_TO]->(t:ThreatActor)
-        RETURN c.name as campaign,
+        RETURN c.name as name,
                c.description as description,
                collect(DISTINCT t.name) as threat_actors
         """
